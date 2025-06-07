@@ -35,19 +35,50 @@ exports.createPedido = (req, res) => {
   );
 };
 
-// Obtener todos los pedidos
+// Obtener todos los pedidos con nombre del cliente
 exports.getPedidos = (req, res) => {
-  db.query("SELECT * FROM pedidos", (err, results) => {
+  const sql = `
+    SELECT 
+      pedidos.PedidoID,
+      pedidos.FechaPedido,
+      pedidos.Total,
+      pedidos.Estado,
+      pedidos.TipoEntrega,
+      pedidos.DireccionEntrega,
+      pedidos.TelefonoContacto,
+      pedidos.ClienteID,
+      clientes.Nombre AS NombreCliente
+    FROM pedidos
+    INNER JOIN clientes ON pedidos.ClienteID = clientes.ClienteID
+  `;
+
+  db.query(sql, (err, results) => {
     if (err) return res.status(500).json({ error: "Error en la base de datos" });
     res.status(200).json(results);
   });
 };
 
-// Obtener pedido por ID
+// Obtener pedido por ID con nombre del cliente
 exports.getPedidoById = (req, res) => {
   const { id } = req.params;
 
-  db.query("SELECT * FROM pedidos WHERE PedidoID = ?", [id], (err, result) => {
+  const sql = `
+    SELECT 
+      pedidos.PedidoID,
+      pedidos.FechaPedido,
+      pedidos.Total,
+      pedidos.Estado,
+      pedidos.TipoEntrega,
+      pedidos.DireccionEntrega,
+      pedidos.TelefonoContacto,
+      pedidos.ClienteID,
+      clientes.Nombre AS NombreCliente
+    FROM pedidos
+    INNER JOIN clientes ON pedidos.ClienteID = clientes.ClienteID
+    WHERE pedidos.PedidoID = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
     if (err) return res.status(500).json({ error: "Error en la base de datos" });
     if (result.length === 0) return res.status(404).json({ error: "Pedido no encontrado" });
     res.status(200).json(result[0]);
